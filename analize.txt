@@ -1,0 +1,222 @@
+====================================================================
+ RELATÓRIO TÉCNICO - MELHORIAS NA CAIXA DE MENSAGENS
+ PROJETO: KARAOKÊ CABANA DONA ANGELA (lista_karaoke_online)
+ VERSÃO ATUAL DO APP: 1.0.5+6
+ DATA: Análise de viabilidade de novos recursos
+====================================================================
+
+------------------------------------------------------------------
+ 1) ESTADO ATUAL DA FUNCIONALIDADE DE MENSAGENS
+------------------------------------------------------------------
+Fluxo atual (como funciona hoje):
+
+[ADMIN - admin_home_page.dart]
+  - O admin digita APENAS o "conteudo" da mensagem (1 campo de texto).
+  - Ao enviar, insere na tabela "mensagens" com:
+      conteudo   = texto digitado
+      ativa      = true
+      admin_uid  = id do admin autenticado
+  - Não existe: título, local, data do evento, tipo, etc.
+
+[HOME PAGE - home_page.dart]
+  - Busca a ÚLTIMA mensagem ativa:
+      SELECT id, conteudo, ativa, criada_em
+      FROM mensagens
+      WHERE ativa = true
+      ORDER BY criada_em DESC
+      LIMIT 1
+  - Exibe UM ÚNICO banner fixo no topo da tela, com botão (X) para fechar.
+
+[MODELO - mensagem_model.dart]
+  - Campos existentes: id, conteudo, ativa, criada_em.
+
+[SCHEMA - admin_setup.sql - tabela "mensagens"]
+  - id         BIGSERIAL PRIMARY KEY
+  - conteudo   TEXT NOT NULL
+  - ativa      BOOLEAN NOT NULL DEFAULT TRUE
+  - admin_uid  UUID REFERENCES auth.users(id)
+  - criada_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+[DEPENDÊNCIAS DISPONÍVEIS - pubspec.yaml]
+  - supabase_flutter ^2.12.4
+  - google_fonts ^8.1.0
+  - flutter_spinkit ^5.2.2
+  - shared_preferences ^2.3.2
+  - NÃO possui carousel_slider (mas PageView é nativo do Flutter).
+
+====================================================================
+ 2) NOVO RECURSO A - CARROSSEL DE THUMBNAILS + ROLAGEM AUTOMÁTICA
+====================================================================
+OBJETIVO:
+  Exibir VÁRIAS mensagens ativas em um carrossel horizontal com
+  miniaturas (thumbnails/indicadores) e avançar automaticamente
+  para a próxima mensagem a cada 10 segundos.
+
+VIABILIDADE: ALTA (rank 5/5) - ESFORÇO: BAIXO
+
+JUSTIFICATIVA TÉCNICA:
+  - PageView ............ Nativo do Flutter (SEM nova dependência).
+  - Timer.periodic ...... Já usado no projeto (debounce de busca).
+  - PageController ...... Permite animateToPage para a transição.
+  - Indicadores (dots) .. Feitos com Row + AnimatedContainer.
+
+MUDANÇAS NECESSÁRIAS NO CÓDIGO:
+  - home_page.dart:
+      _fetchMensagem() hoje usa LIMIT 1.
+      -> Alterar para buscar TODAS as mensagens ativas
+         (ex.: .eq('ativa', true).order('criada_em', descending))
+      -> Armazenar em List<MensagemModel> em vez de MensagemModel único.
+      -> Construir PageView.builder no lugar do banner único.
+      -> Timer.periodic(Duration(seconds: 10)) para auto avançar.
+      -> Pausar o autoplay quando o usuário interagir (drag).
+
+MUDANÇAS NO BANCO: NENHUMA.
+
+====================================================================
+ 3) NOVO RECURSO B - CLICK PARA VER MENSAGEM COMPLETA
+====================================================================
+OBJETIVO:
+  Ao tocar em uma mensagem do carrossel, abrir uma tela/dialog com a
+  mensagem completa e TODOS os atributos (conteúdo, data, e futuros
+  atributos como título, local e data do evento).
+
+VIABILIDADE: ALTA (rank 5/5) - ESFORÇO: BAIXO
+
+JUSTIFICATIVA TÉCNICA:
+  - Envolver cada página do PageView com InkWell/GestureDetector.
+  - Ao tocar, abrir:
+      showModalBottomSheet (bottom sheet modal)  OU
+      Navigator.push (nova página de detalhes).
+  - Se o schema adicionar novos campos, eles aparecerão nesta tela.
+
+MUDANÇAS NECESSÁRIAS NO CÓDIGO:
+  - Criar widget MensagemDetailSheet ou MensagemDetailPage.
+  - Adicionar campo "titulo" etc. ao MensagemModel (opcional, fase 2).
+
+MUDANÇAS NO BANCO: NENHUMA por ora (opcional na fase 2).
+
+====================================================================
+ 4) NOVO RECURSO C - CONFIRMAÇÃO DE PRESENÇA NO EVENTO
+====================================================================
+OBJETIVO:
+  O usuário pode tocar em um botão "Confirmar presença" na mensagem,
+  e o admin visualiza a estatística de confirmações por mensagem.
+
+VIABILIDADE: MÉDIA-ALTA (rank 4/5) - ESFORÇO: MÉDIO
+
+JUSTIFICATIVA TÉCNICA:
+  - Segue o MESMO padrão já implementado nas estatísticas de acesso
+    (tabela "acessos" + RLS + função RPC stats_acessos).
+  - Reutiliza o disciplina dispositivo_id do AccessLog (já existente).
+
+MUDANÇAS NECESSÁRIAS NO BANCO (Supabase):
+  1) Ampliar tabela "mensagens" (opcional, para o evento):
+     ALTER TABLE public.mensagens
+       ADD COLUMN IF NOT EXISTS evento_titulo TEXT,
+       ADD COLUMN IF NOT EXISTS evento_data   TIMESTAMPTZ,
+       ADD COLUMN IF NOT EXISTS evento_local  TEXT;
+
+  2) Nova tabela "confirmacoes_presenca":
+     CREATE TABLE IF NOT EXISTS public.confirmacoes_presenca (
+       id             BIGSERIAL PRIMARY KEY,
+       mensagem_id    BIGINT REFERENCES public.mensagens(id)
+                      ON DELETE CASCADE,
+       dispositivo_id TEXT NOT NULL,
+       nome           TEXT,
+       criado_em      TIMESTAMPTZ NOT NULL DEFAULT now(),
+       UNIQUE(mensagem_id, dispositivo_id)  -- impede confirmação dupla
+     );
+
+  3) RLS na nova tabela:
+     ALTER TABLE public.confirmacoes_presenca ENABLE ROW LEVEL SECURITY;
+
+     -- Qualquer pessoa pode confirmar presença (INSERT público)
+     CREATE POLICY presenca_insert_public
+       ON public.confirmacoes_presenca
+       FOR INSERT TO anon, authenticated
+       WITH CHECK (true);
+
+     -- Apenas admin (autenticado) pode ler as confirmações
+     CREATE POLICY presenca_select_auth
+       ON public.confirmacoes_presenca
+       FOR SELECT TO authenticated
+       USING (true);
+
+     GRANT INSERT ON public.confirmacoes_presenca TO anon;
+     GRANT INSERT, SELECT ON public.confirmacoes_presenca TO authenticated;
+
+  4) Função para contar confirmações por mensagem:
+     CREATE OR REPLACE FUNCTION public.stats_confirmacoes(m_id bigint)
+     RETURNS bigint
+     LANGUAGE sql
+     SECURITY DEFINER
+     SET search_path = public
+     AS $$
+       SELECT COUNT(*) FROM public.confirmacoes_presenca
+       WHERE mensagem_id = m_id;
+     $$;
+     GRANT EXECUTE ON FUNCTION stats_confirmacoes(bigint) TO authenticated;
+
+MUDANÇAS NECESSÁRIAS NO CÓDIGO (Flutter):
+  - No carrossel/mensagem: botão "✅ Confirmar presença".
+  - Ao tocar: INSERT em confirmacoes_presenca com dispositivo_id.
+  - Tratar erro de UNIQUE (usuario ja confirmou -> avisar "Já confirmado").
+  - No admin: nova seção/aba "Presença" listando cada mensagem
+    + numero de confirmacoes (chamando stats_confirmacoes).
+
+====================================================================
+ 5) RESUMO DA VIABILIDADE
+====================================================================
++---------------------+-------------+---------+---------------------+
+| RECURSO             | VIABILIDADE | ESFORÇO | NOVO SCHEMA?        |
++---------------------+-------------+---------+---------------------+
+| A. Carrossel+auto   | Alta       | Baixo   | Não                 |
+| B. Mensa. completa  | Alta       | Baixo   | Opcional (fase 2)   |
+| C. Confirma presença| Media-Alta | Médio   | SIM (nova tabela)   |
++---------------------+-------------+---------+---------------------+
+
+====================================================================
+ 6) RECOMENDAÇÃO DE IMPLEMENTAÇÃO EM FASES
+====================================================================
+FASE 1 (simples, SEM mudança no banco):
+  - Carrossel de mensagens (PageView) + autoplay de 10s + indicadores.
+  - Click abre detalhes com atributos já existentes (conteudo, criada_em).
+
+FASE 2 (com mudança no Supabase):
+  - Ampliar mensagens: evento_titulo, evento_data, evento_local.
+  - Criar tabela confirmacoes_presenca + RLS + função stats_confirmacoes.
+  - Botão "Confirmar presença" no app.
+  - Painel admin com estatística de presença por mensagem.
+
+====================================================================
+ 7) PONTOS DE ATENÇÃO
+====================================================================
+1. RLS ATUAL da tabela mensagens:
+     SELECT ... USING (ativa = true)
+   -> Só retorna mensagens ATIVAS para anon.
+   -> O admin (authenticated) usa outra policy e consegue ver todas.
+
+2. AUTOPLAY & UX:
+   -> A rolagem automática deve PAUSAR quando o usuário arrasta,
+      para não "roubar" o controle (boa prática).
+
+3. DISPOSITIVO_ID:
+   -> Reutilizar o mesmo disciplina_id do AccessLog para garantir
+      consistência nas confirmações de presença.
+
+4. PERFORMANCE:
+   -> A tabela de mensagens é pequena; buscar todas as ativas
+      é leve, sem risco de gargalo.
+
+5. DUPLA CONFIRMAÇÃO:
+   -> A constraint UNIQUE(mensagem_id, dispositivo_id) impede que
+      o mesmo dispositivo confirme 2x na mesma mensagem.
+
+====================================================================
+ FINAL DO RELATÓRIO
+====================================================================
+Conclusão:
+  Os 3 recursos são VIÁVEIS. Carrossel e detalhes não exigem mudanças
+  no banco. Confirmação de presença exige nova tabela + RLS, mas factível
+  seguindo o padrão de estatísticas já existente no projeto.
+
