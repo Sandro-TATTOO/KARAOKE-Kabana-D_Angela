@@ -25,9 +25,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-
   Future<List<SongModel>>? _future;
-  MensagemModel? _mensagem;
+
+  // Mensagens (carrossel)
+  List<MensagemModel> _mensagens = [];
+  PageController? _mensagemPageController;
+  Timer? _mensagemAutoplay;
+  int _mensagemPageIndex = 0;
+  bool _mensagemUserInteracting = false;
+
   Set<int> _favorites = <int>{};
 
   @override
@@ -58,9 +64,9 @@ class _HomePageState extends State<HomePage> {
 
   /// Abre a página de músicas favoritas.
   void _openFavorites() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const FavoritesPage()));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const FavoritesPage()),
+    );
   }
 
   /// Carrega a lista priorizando o cache local (rápido) e, em paralelo,
@@ -95,12 +101,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _mensagemAutoplay?.cancel();
+    _mensagemPageController?.dispose();
     _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  /// Busca a mensagem ativa mais recente enviada pelo admin.
+  /// Busca TODAS as mensagens ativas enviadas pelo admin.
   Future<void> _fetchMensagem() async {
     try {
       final client = SupabaseClientFactory.instance;
@@ -108,18 +116,119 @@ class _HomePageState extends State<HomePage> {
           .from('mensagens')
           .select('id, conteudo, ativa, criada_em')
           .eq('ativa', true)
-          .order('criada_em', ascending: false)
-          .limit(1);
+          .order('criada_em', ascending: false);
 
       final list = (response as List?) ?? const [];
-      if (!mounted || list.isEmpty) return;
+      if (!mounted) return;
+
+      final mensagens = list
+          .map((e) => MensagemModel.fromMap(e as Map<String, dynamic>))
+          .toList();
+
+      _mensagemAutoplay?.cancel();
+      _mensagemPageController?.dispose();
 
       setState(() {
-        _mensagem = MensagemModel.fromMap(list.first as Map<String, dynamic>);
+        _mensagens = mensagens;
+        _mensagemPageIndex = 0;
+        _mensagemPageController =
+            mensagens.length > 1 ? PageController() : null;
       });
+
+      if (mensagens.length > 1) {
+        _startMensagemAutoplay();
+      }
     } catch (_) {
       // Silencioso: se não houver tabela/permissão, não quebra a HomePage.
     }
+  }
+
+  /// Inicia a rolagem automática do carrossel a cada 10 segundos.
+  void _startMensagemAutoplay() {
+    _mensagemAutoplay?.cancel();
+    _mensagemAutoplay = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (!mounted || _mensagemUserInteracting) return;
+      if (_mensagens.length <= 1 || _mensagemPageController == null) return;
+      if (!_mensagemPageController!.hasClients) return;
+
+      final next = (_mensagemPageIndex + 1) % _mensagens.length;
+      _mensagemPageController!.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  /// Abre o detalhe completo da mensagem.
+  void _showMensagemDetalhe(MensagemModel mensagem) {
+    final scheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: scheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: scheme.onSurface.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.campaign, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Mensagem do Admin',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                mensagem.conteudo,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Enviada em: '
+                '${mensagem.criadaEm.day.toString().padLeft(2, '0')}/'
+                '${mensagem.criadaEm.month.toString().padLeft(2, '0')}/'
+                '${mensagem.criadaEm.year} '
+                '${mensagem.criadaEm.hour.toString().padLeft(2, '0')}:'
+                '${mensagem.criadaEm.minute.toString().padLeft(2, '0')}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurface.withValues(alpha: 0.6),
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Fechar'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _onSearchChanged(String value) {
@@ -133,8 +242,10 @@ class _HomePageState extends State<HomePage> {
 
   /// Remove acentos e normaliza a string para busca "branda".
   String _normalize(String input) {
-    const withAccents = 'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
-    const withoutAccents = 'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
+    const withAccents =
+        'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
+    const withoutAccents =
+        'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
     final buffer = StringBuffer();
     for (final rune in input.split('')) {
       final idx = withAccents.indexOf(rune);
@@ -144,14 +255,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Carrega TODAS as músicas do catálogo usando paginação.
-  ///
-  /// O PostgREST limita cada consulta a 1000 linhas, então fazemos um loop
-  /// com ranges para trazer o catálogo completo e depois filtramos em memória.
   Future<List<SongModel>> _fetchSongs(String query) async {
     final client = SupabaseClientFactory.instance;
     const fields = 'numero, cantor, musica, trecho, letra_completa';
     const pageSize = 1000;
-
     var from = 0;
     final all = <SongModel>[];
 
@@ -166,7 +273,9 @@ class _HomePageState extends State<HomePage> {
       final list = (response as List?) ?? const [];
       if (list.isEmpty) break;
 
-      all.addAll(list.map((e) => SongModel.fromMap(e as Map<String, dynamic>)));
+      all.addAll(
+        list.map((e) => SongModel.fromMap(e as Map<String, dynamic>)),
+      );
 
       if (list.length < pageSize) break;
       from += pageSize;
@@ -189,52 +298,116 @@ class _HomePageState extends State<HomePage> {
       _future = null;
     });
     await _loadSongsWithCache();
+    await _fetchMensagem();
   }
 
   /// Abre a tela de detalhes de uma música.
   void _openDetail(BuildContext context, SongModel song) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => SongDetailPage(song: song)));
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => SongDetailPage(song: song)),
+    );
   }
 
-  /// Fecha (oculta) a mensagem do admin na sessão atual.
-  void _dismissMensagem() {
-    setState(() => _mensagem = null);
-  }
+  /// Carrossel de mensagens do admin (autoplay + click para detalhes).
+  Widget _buildMensagemCarousel() {
+    if (_mensagens.isEmpty) return const SizedBox.shrink();
 
-  /// Banner exibindo a mensagem do admin no topo do catálogo.
-  Widget _buildMensagemBanner(MensagemModel mensagem) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 14, right: 6, top: 8, bottom: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [scheme.primary, scheme.primary.withValues(alpha: 0.8)],
-        ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.campaign, color: scheme.onPrimary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              mensagem.conteudo,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: scheme.onPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 64,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification) {
+                _mensagemUserInteracting = true;
+              } else if (notification is ScrollEndNotification) {
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (mounted) _mensagemUserInteracting = false;
+                });
+              }
+              return false;
+            },
+            child: PageView.builder(
+              controller: _mensagemPageController,
+              itemCount: _mensagens.length,
+              onPageChanged: (index) {
+                setState(() => _mensagemPageIndex = index);
+              },
+              itemBuilder: (context, index) {
+                final mensagem = _mensagens[index];
+                return GestureDetector(
+                  onTap: () => _showMensagemDetalhe(mensagem),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    padding: const EdgeInsets.only(
+                      left: 14,
+                      right: 10,
+                      top: 8,
+                      bottom: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          scheme.primary,
+                          scheme.primary.withValues(alpha: 0.8),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.campaign, color: scheme.onPrimary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            mensagem.conteudo,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: scheme.onPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: scheme.onPrimary.withValues(alpha: 0.8),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          IconButton(
-            tooltip: 'Fechar mensagem',
-            icon: Icon(Icons.close, color: scheme.onPrimary),
-            onPressed: _dismissMensagem,
+        ),
+        if (_mensagens.length > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_mensagens.length, (index) {
+              final selected = index == _mensagemPageIndex;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: selected ? 16 : 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? scheme.primary
+                      : scheme.onSurface.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              );
+            }),
           ),
         ],
-      ),
+      ],
     );
   }
 
@@ -269,9 +442,9 @@ class _HomePageState extends State<HomePage> {
             tooltip: 'Área do Admin',
             icon: const Icon(Icons.admin_panel_settings),
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const AdminLoginPage()));
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AdminLoginPage()),
+              );
             },
           ),
         ],
@@ -292,9 +465,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              if (_mensagem != null) ...[
+              if (_mensagens.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                _buildMensagemBanner(_mensagem!),
+                _buildMensagemCarousel(),
               ],
               const SizedBox(height: 16),
               Expanded(
@@ -340,7 +513,8 @@ class _HomePageState extends State<HomePage> {
                         return SongCard(
                           song: song,
                           isFavorite: _favorites.contains(song.numero),
-                          onFavoriteToggle: () => _toggleFavorite(song.numero),
+                          onFavoriteToggle: () =>
+                              _toggleFavorite(song.numero),
                           onTap: () => _openDetail(context, song),
                         );
                       },

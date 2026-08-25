@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import '../core/access_stats_service.dart';
 import '../core/supabase_client.dart';
 import '../models/acesso_stats.dart';
+import '../models/mensagem_model.dart';
 import '../models/song_model.dart';
 import '../widgets/loading_button.dart';
 
-/// Painel do administrador com três recursos:
+/// Painel do administrador:
 /// 1. Incluir nova música
 /// 2. Buscar / Corrigir / Excluir música
-/// 3. Enviar mensagem para os usuários
+/// 3. Mensagens (enviar, listar, editar, apagar, expiração)
+/// 4. Estatísticas
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
@@ -36,7 +38,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
   // ---- Mensagem ----
   final _msgCtrl = TextEditingController();
   bool _sendingMsg = false;
+  bool _clearingMsgs = false;
   String? _msgResult;
+  List<MensagemModel> _mensagens = [];
+  bool _loadingMensagens = false;
 
   // ---- Estatísticas ----
   AcessoStats? _stats;
@@ -137,14 +142,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
       final client = SupabaseClientFactory.instance;
       final numero = int.tryParse(query);
 
-      // Busca por número exato, ou por texto (cantor/música) via ILIKE
       final response = await client
           .from('songs')
           .select('numero, cantor, musica, trecho, letra_completa')
           .or(
             numero != null
-                ? 'numero.eq.$numero, cantor.ilike.%$query%, musica.ilike.%$query%'
-                : 'cantor.ilike.%$query%, musica.ilike.%$query%',
+                ? 'numero.eq.$numero,cantor.ilike.%$query%,musica.ilike.%$query%'
+                : 'cantor.ilike.%$query%,musica.ilike.%$query%',
           )
           .order('numero', ascending: true)
           .limit(50);
@@ -167,7 +171,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
-  /// Abre um diálogo para corrigir (editar) uma música.
   Future<void> _editSong(SongModel song) async {
     final numeroCtrl = TextEditingController(text: song.numero.toString());
     final cantorCtrl = TextEditingController(text: song.cantor);
@@ -255,7 +258,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
-  /// Exclui uma música (com confirmação).
   Future<void> _deleteSong(SongModel song) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -300,8 +302,34 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   // ============================================================
-  // 3) ENVIAR MENSAGEM
+  // 3) MENSAGENS
   // ============================================================
+  Future<void> _loadMensagens() async {
+    setState(() => _loadingMensagens = true);
+    try {
+      final response = await SupabaseClientFactory.instance
+          .from('mensagens')
+          .select('id, conteudo, ativa, criada_em')
+          .order('criada_em', ascending: false)
+          .limit(50);
+
+      final list = (response as List?) ?? const [];
+      if (!mounted) return;
+      setState(() {
+        _mensagens = list
+            .map((e) => MensagemModel.fromMap(e as Map<String, dynamic>))
+            .toList();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Erro ao carregar mensagens: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingMensagens = false);
+    }
+  }
+
   Future<void> _sendMessage() async {
     final conteudo = _msgCtrl.text.trim();
     if (conteudo.isEmpty) {
@@ -328,6 +356,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         _msgResult = '✅ Mensagem enviada aos usuários!';
         _msgCtrl.clear();
       });
+      await _loadMensagens();
     } catch (e) {
       if (!mounted) return;
       setState(() => _msgResult = '❌ Erro ao enviar: $e');
@@ -336,8 +365,191 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
+  Future<void> _editMensagem(MensagemModel msg) async {
+    final conteudoCtrl = TextEditingController(text: msg.conteudo);
+    bool ativa = msg.ativa;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setLocal) {
+            return AlertDialog(
+              title: const Text('Editar Mensagem'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: conteudoCtrl,
+                      maxLines: 4,
+                      maxLength: 500,
+                      decoration: const InputDecoration(
+                        labelText: 'Conteúdo',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Mensagem ativa'),
+                      value: ativa,
+                      onChanged: (v) => setLocal(() => ativa = v),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancelar'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Salvar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result != true || !mounted) return;
+
+    final novoConteudo = conteudoCtrl.text.trim();
+    if (novoConteudo.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conteúdo não pode ficar vazio.')),
+      );
+      return;
+    }
+
+    try {
+      await SupabaseClientFactory.instance
+          .from('mensagens')
+          .update({'conteudo': novoConteudo, 'ativa': ativa})
+          .eq('id', msg.id);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('✅ Mensagem atualizada!')));
+      await _loadMensagens();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Erro ao editar: $e')));
+    }
+  }
+
+  Future<void> _deleteMensagem(MensagemModel msg) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Apagar Mensagem'),
+        content: Text('Apagar esta mensagem?\n\n"${msg.conteudo}"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Apagar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      await SupabaseClientFactory.instance
+          .from('mensagens')
+          .delete()
+          .eq('id', msg.id);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('🗑️ Mensagem apagada!')));
+      await _loadMensagens();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Erro ao apagar: $e')));
+    }
+  }
+
+  /// Desativa TODAS as mensagens ativas de uma vez.
+  Future<void> _clearAllMessages() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limpar Painel'),
+        content: const Text(
+          'Deseja desativar TODAS as mensagens do carrossel agora?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Desativar Todas'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _clearingMsgs = true);
+
+    try {
+      await SupabaseClientFactory.instance
+          .from('mensagens')
+          .update({'ativa': false})
+          .eq('ativa', true);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Todas as mensagens foram desativadas!'),
+        ),
+      );
+      await _loadMensagens();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Erro ao limpar: $e')));
+    } finally {
+      if (mounted) setState(() => _clearingMsgs = false);
+    }
+  }
+
+  String _formatDateTime(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')}/'
+        '${local.year} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+
   // ============================================================
-  // BUILD: NAVEGAÇÃO ENTRE MENUS
+  // BUILD
   // ============================================================
   @override
   Widget build(BuildContext context) {
@@ -355,7 +567,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Menu horizontal de navegação
             Padding(
               padding: const EdgeInsets.all(12),
               child: SegmentedButton<int>(
@@ -382,8 +593,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ],
                 selected: {_currentIndex},
-                onSelectionChanged: (selection) =>
-                    setState(() => _currentIndex = selection.first),
+                onSelectionChanged: (selection) {
+                  setState(() => _currentIndex = selection.first);
+                  if (selection.first == 2 && _mensagens.isEmpty) {
+                    _loadMensagens();
+                  }
+                },
               ),
             ),
             Expanded(
@@ -403,7 +618,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  // ---- Painel 1: Incluir música ----
   Widget _buildAddPanel() {
     final scheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
@@ -468,7 +682,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  // ---- Painel 2: Buscar / Corrigir / Excluir ----
   Widget _buildSearchPanel() {
     return Column(
       children: [
@@ -570,23 +783,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  // ---- Painel 3: Enviar mensagem ----
   Widget _buildMessagePanel() {
     final scheme = Theme.of(context).colorScheme;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+
+    return RefreshIndicator(
+      onRefresh: _loadMensagens,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Enviar mensagem para os usuários do app',
+            'Enviar mensagem para os usuários',
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
-            'A mensagem aparecerá como um aviso no topo da tela inicial.',
+            'A mensagem aparece no topo da tela inicial (carrossel).',
             style: TextStyle(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 16),
@@ -600,6 +813,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               alignLabelWithHint: true,
             ),
           ),
+          const SizedBox(height: 16),
           if (_msgResult != null) ...[
             Container(
               padding: const EdgeInsets.all(12),
@@ -617,16 +831,109 @@ class _AdminHomePageState extends State<AdminHomePage> {
             icon: Icons.campaign,
             onPressed: _sendMessage,
           ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.error,
+              side: BorderSide(color: scheme.error),
+            ),
+            icon: _clearingMsgs
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.delete_sweep),
+            label: const Text('Limpar Painel (Desativar Todas)'),
+            onPressed: _clearingMsgs ? null : _clearAllMessages,
+          ),
+          const SizedBox(height: 24),
+
+          Row(
+            children: [
+              Text(
+                'Mensagens enviadas',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const Spacer(),
+              IconButton(
+                tooltip: 'Atualizar lista',
+                onPressed: _loadingMensagens ? null : _loadMensagens,
+                icon: _loadingMensagens
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_loadingMensagens && _mensagens.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_mensagens.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'Nenhuma mensagem cadastrada ainda.',
+                style: TextStyle(color: scheme.onSurfaceVariant),
+              ),
+            )
+          else
+            ..._mensagens.map((msg) {
+              final status = !msg.ativa ? 'Inativa' : 'Ativa';
+              final statusColor = !msg.ativa ? scheme.error : Colors.green;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  title: Text(
+                    msg.conteudo,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    'Criada: ${_formatDateTime(msg.criadaEm)}'
+                    '\nStatus: $status',
+                    style: TextStyle(
+                      color: scheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                  isThreeLine: true,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, size: 10, color: statusColor),
+                      IconButton(
+                        tooltip: 'Editar',
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _editMensagem(msg),
+                      ),
+                      IconButton(
+                        tooltip: 'Apagar',
+                        icon: Icon(Icons.delete, color: scheme.error),
+                        onPressed: () => _deleteMensagem(msg),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );
   }
 
-  // ---- Painel 4: Estatísticas de uso ----
   Widget _buildStatsPanel() {
     final scheme = Theme.of(context).colorScheme;
 
-    // Carrega as estatísticas na primeira vez que o painel é exibido.
     if (_stats == null && !_statsLoading) {
       _loadStats();
     }
@@ -728,7 +1035,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  /// Card com um contador de estatística.
   Widget _buildStatCard({
     required IconData icon,
     required String label,
@@ -755,7 +1061,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  /// Formata a data "YYYY-MM-DD" para "DD/MM/YYYY".
   String _formatData(dynamic data) {
     final s = data?.toString() ?? '';
     final parts = s.split('-');

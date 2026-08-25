@@ -1,3 +1,7 @@
 {
-    "blackbox.mcpMarketplace.enabled": true
+    "blackbox.mcpMarketplace.enabled": true,
+    "vercel.checks.autorefresh": false,
+    "vercel.deployments.autorefresh": false,
+    "vercel.logs.autorefresh": false,
+    "vercel.deployments.autorefreshPeriod": 20
 }
