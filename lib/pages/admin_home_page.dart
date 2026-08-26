@@ -10,7 +10,7 @@ import '../widgets/loading_button.dart';
 /// Painel do administrador:
 /// 1. Incluir nova música
 /// 2. Buscar / Corrigir / Excluir música
-/// 3. Mensagens (enviar, listar, editar, apagar, expiração)
+/// 3. Mensagens (enviar, listar, editar, apagar)
 /// 4. Estatísticas
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -487,7 +487,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
-  /// Desativa TODAS as mensagens ativas de uma vez.
   Future<void> _clearAllMessages() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -515,7 +514,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     if (confirm != true || !mounted) return;
 
     setState(() => _clearingMsgs = true);
-
     try {
       await SupabaseClientFactory.instance
           .from('mensagens')
@@ -848,7 +846,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
             onPressed: _clearingMsgs ? null : _clearAllMessages,
           ),
           const SizedBox(height: 24),
-
           Row(
             children: [
               Text(
@@ -899,8 +896,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    'Criada: ${_formatDateTime(msg.criadaEm)}'
-                    '\nStatus: $status',
+                    'Criada: ${_formatDateTime(msg.criadaEm)}\nStatus: $status',
                     style: TextStyle(
                       color: scheme.onSurfaceVariant,
                       height: 1.35,

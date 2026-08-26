@@ -42,39 +42,38 @@ class _HomePageState extends State<HomePage> {
     _loadSongsWithCache();
     _fetchMensagem();
     _loadFavorites();
-    // Registra a abertura do app para as estatísticas de uso (APK + Web).
     AccessLog.registrarAcesso();
   }
 
-  /// Carrega os números das músicas favoritas salvas no dispositivo.
   Future<void> _loadFavorites() async {
     final favs = await FavoritesStore.load();
+
     if (!mounted) return;
+
     setState(() => _favorites = favs);
   }
 
-  /// Alterna o estado de favorito de uma música e atualiza a tela.
   Future<void> _toggleFavorite(int numero) async {
     await FavoritesStore.toggle(numero);
+
     if (!mounted) return;
+
     setState(() {
       _favorites = FavoritesStore.current;
     });
   }
 
-  /// Abre a página de músicas favoritas.
   void _openFavorites() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const FavoritesPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const FavoritesPage()));
   }
 
-  /// Carrega a lista priorizando o cache local (rápido) e, em paralelo,
-  /// busca os dados mais recentes do Supabase e atualiza o cache.
   Future<void> _loadSongsWithCache() async {
-    // 1) Mostra o cache local imediatamente (busca instantânea).
     final cached = await SongCache.load();
+
     if (!mounted) return;
+
     setState(() {
       if (cached != null && cached.isNotEmpty) {
         _future = Future.value(cached);
@@ -83,20 +82,19 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    // 2) Busca no Supabase (dados sempre atualizados) e atualiza o cache.
     try {
       final fresh = await _fetchSongs('');
+
       if (!mounted) return;
+
       await SongCache.save(fresh);
-      // Só atualiza a tela se não houver busca ativa no momento.
+
       if (_searchController.text.trim().isEmpty) {
         setState(() {
           _future = Future.value(fresh);
         });
       }
-    } catch (_) {
-      // Se falhar, mantém o cache exibido (modo offline).
-    }
+    } catch (_) {}
   }
 
   @override
@@ -105,13 +103,14 @@ class _HomePageState extends State<HomePage> {
     _mensagemPageController?.dispose();
     _debounce?.cancel();
     _searchController.dispose();
+
     super.dispose();
   }
 
-  /// Busca TODAS as mensagens ativas enviadas pelo admin.
   Future<void> _fetchMensagem() async {
     try {
       final client = SupabaseClientFactory.instance;
+
       final response = await client
           .from('mensagens')
           .select('id, conteudo, ativa, criada_em')
@@ -119,6 +118,7 @@ class _HomePageState extends State<HomePage> {
           .order('criada_em', ascending: false);
 
       final list = (response as List?) ?? const [];
+
       if (!mounted) return;
 
       final mensagens = list
@@ -131,27 +131,31 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _mensagens = mensagens;
         _mensagemPageIndex = 0;
-        _mensagemPageController =
-            mensagens.length > 1 ? PageController() : null;
+        _mensagemPageController = mensagens.length > 1
+            ? PageController()
+            : null;
       });
 
       if (mensagens.length > 1) {
         _startMensagemAutoplay();
       }
-    } catch (_) {
-      // Silencioso: se não houver tabela/permissão, não quebra a HomePage.
-    }
+    } catch (_) {}
   }
 
-  /// Inicia a rolagem automática do carrossel a cada 10 segundos.
   void _startMensagemAutoplay() {
     _mensagemAutoplay?.cancel();
+
     _mensagemAutoplay = Timer.periodic(const Duration(seconds: 10), (_) {
       if (!mounted || _mensagemUserInteracting) return;
-      if (_mensagens.length <= 1 || _mensagemPageController == null) return;
+
+      if (_mensagens.length <= 1 || _mensagemPageController == null) {
+        return;
+      }
+
       if (!_mensagemPageController!.hasClients) return;
 
       final next = (_mensagemPageIndex + 1) % _mensagens.length;
+
       _mensagemPageController!.animateToPage(
         next,
         duration: const Duration(milliseconds: 400),
@@ -160,9 +164,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  /// Abre o detalhe completo da mensagem.
   void _showMensagemDetalhe(MensagemModel mensagem) {
     final scheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: scheme.surface,
@@ -194,8 +198,8 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Mensagem do Admin',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -213,8 +217,8 @@ class _HomePageState extends State<HomePage> {
                 '${mensagem.criadaEm.hour.toString().padLeft(2, '0')}:'
                 '${mensagem.criadaEm.minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurface.withValues(alpha: 0.6),
-                    ),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
               const SizedBox(height: 12),
               Align(
@@ -233,6 +237,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onSearchChanged(String value) {
     _debounce?.cancel();
+
     _debounce = Timer(const Duration(milliseconds: 400), () {
       setState(() {
         _future = _fetchSongs(value.trim());
@@ -240,30 +245,36 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  /// Remove acentos e normaliza a string para busca "branda".
   String _normalize(String input) {
-    const withAccents =
-        'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
-    const withoutAccents =
-        'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
+    const withAccents = 'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
+
+    const withoutAccents = 'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
+
     final buffer = StringBuffer();
+
     for (final rune in input.split('')) {
       final idx = withAccents.indexOf(rune);
+
       buffer.write(idx >= 0 ? withoutAccents[idx] : rune);
     }
+
     return buffer.toString().toLowerCase();
   }
 
-  /// Carrega TODAS as músicas do catálogo usando paginação.
   Future<List<SongModel>> _fetchSongs(String query) async {
     final client = SupabaseClientFactory.instance;
+
     const fields = 'numero, cantor, musica, trecho, letra_completa';
+
     const pageSize = 1000;
+
     var from = 0;
+
     final all = <SongModel>[];
 
     while (true) {
       final to = from + pageSize - 1;
+
       final response = await client
           .from('songs')
           .select(fields)
@@ -271,20 +282,22 @@ class _HomePageState extends State<HomePage> {
           .range(from, to);
 
       final list = (response as List?) ?? const [];
+
       if (list.isEmpty) break;
 
-      all.addAll(
-        list.map((e) => SongModel.fromMap(e as Map<String, dynamic>)),
-      );
+      all.addAll(list.map((e) => SongModel.fromMap(e as Map<String, dynamic>)));
 
       if (list.length < pageSize) break;
+
       from += pageSize;
     }
 
     final normalizedQuery = _normalize(query).trim();
-    if (normalizedQuery.isEmpty) return all;
 
-    // Busca branda: ignora maiúsculas e acentos.
+    if (normalizedQuery.isEmpty) {
+      return all;
+    }
+
     return all.where((song) {
       return _normalize(song.cantor).contains(normalizedQuery) ||
           _normalize(song.musica).contains(normalizedQuery) ||
@@ -292,25 +305,25 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
-  /// Recarrega a lista de músicas do Supabase e atualiza o cache.
   Future<void> _reload() async {
     setState(() {
       _future = null;
     });
+
     await _loadSongsWithCache();
     await _fetchMensagem();
   }
 
-  /// Abre a tela de detalhes de uma música.
   void _openDetail(BuildContext context, SongModel song) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => SongDetailPage(song: song)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => SongDetailPage(song: song)));
   }
 
-  /// Carrossel de mensagens do admin (autoplay + click para detalhes).
   Widget _buildMensagemCarousel() {
-    if (_mensagens.isEmpty) return const SizedBox.shrink();
+    if (_mensagens.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     final scheme = Theme.of(context).colorScheme;
 
@@ -324,61 +337,78 @@ class _HomePageState extends State<HomePage> {
                 _mensagemUserInteracting = true;
               } else if (notification is ScrollEndNotification) {
                 Future.delayed(const Duration(seconds: 3), () {
-                  if (mounted) _mensagemUserInteracting = false;
+                  if (mounted) {
+                    _mensagemUserInteracting = false;
+                  }
                 });
               }
+
               return false;
             },
             child: PageView.builder(
               controller: _mensagemPageController,
               itemCount: _mensagens.length,
               onPageChanged: (index) {
-                setState(() => _mensagemPageIndex = index);
+                setState(() {
+                  _mensagemPageIndex = index;
+                });
               },
               itemBuilder: (context, index) {
                 final mensagem = _mensagens[index];
-                return GestureDetector(
-                  onTap: () => _showMensagemDetalhe(mensagem),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    padding: const EdgeInsets.only(
-                      left: 14,
-                      right: 10,
-                      top: 8,
-                      bottom: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          scheme.primary,
-                          scheme.primary.withValues(alpha: 0.8),
+
+                return Tooltip(
+                  message: 'Toque para ver a mensagem completa',
+                  child: GestureDetector(
+                    onTap: () => _showMensagemDetalhe(mensagem),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      padding: const EdgeInsets.only(
+                        left: 14,
+                        right: 10,
+                        top: 8,
+                        bottom: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            scheme.primary,
+                            scheme.primary.withValues(alpha: 0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+
+                      // =====================================================
+                      // TRECHO CORRIGIDO CONFORME SOLICITADO
+                      // =====================================================
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.campaign,
+                            color: scheme.onPrimary,
+                            size: 26, // era ~24 (padrão)
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              mensagem.conteudo,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: scheme.onPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.touch_app,
+                            color: scheme.onPrimary.withValues(alpha: 0.95),
+                            size: 42, // era 22
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.campaign, color: scheme.onPrimary),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            mensagem.conteudo,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: scheme.onPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          color: scheme.onPrimary.withValues(alpha: 0.8),
-                        ),
-                      ],
                     ),
                   ),
                 );
@@ -392,6 +422,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(_mensagens.length, (index) {
               final selected = index == _mensagemPageIndex;
+
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -442,9 +473,9 @@ class _HomePageState extends State<HomePage> {
             tooltip: 'Área do Admin',
             icon: const Icon(Icons.admin_panel_settings),
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AdminLoginPage()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const AdminLoginPage()));
             },
           ),
         ],
@@ -490,7 +521,8 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'Erro ao carregar músicas.\n'
                             'Verifique a conexão com o Supabase e as '
-                            'permissões (RLS).\n\n${snapshot.error}',
+                            'permissões (RLS).\n\n'
+                            '${snapshot.error}',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -498,6 +530,7 @@ class _HomePageState extends State<HomePage> {
                     }
 
                     final songs = snapshot.data ?? const <SongModel>[];
+
                     if (songs.isEmpty) {
                       return const Center(
                         child: Text('Nenhuma música encontrada.'),
@@ -510,11 +543,11 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         final song = songs[index];
+
                         return SongCard(
                           song: song,
                           isFavorite: _favorites.contains(song.numero),
-                          onFavoriteToggle: () =>
-                              _toggleFavorite(song.numero),
+                          onFavoriteToggle: () => _toggleFavorite(song.numero),
                           onTap: () => _openDetail(context, song),
                         );
                       },
