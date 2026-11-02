@@ -37,6 +37,8 @@ dependencies:
   supabase_flutter: ^2.12.4
   google_fonts: ^8.1.0
   flutter_spinkit: ^5.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
   shared_preferences: ^2.3.2
 
 dev_dependencies:
@@ -55,10 +57,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/data/songs.json
+    - assets/data/catalog_version.txt
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../core/access_log.dart';
+import '../core/catalog_repository.dart';
 import '../core/favorites_store.dart';
-import '../core/song_cache.dart';
 import '../core/supabase_client.dart';
 import '../models/mensagem_model.dart';
 import '../models/song_model.dart';
@@ -25,7 +25,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  Future<List<SongModel>>? _future;
 
   // Mensagens (carrossel)
   List<MensagemModel> _mensagens = [];
@@ -36,14 +35,56 @@ class _HomePageState extends State<HomePage> {
 
   Set<int> _favorites = <int>{};
 
+  // Catálogo em memória
+  Future<List<SongModel>>? _future;
+  String? _backendMessage;
+
   @override
   void initState() {
     super.initState();
-    _loadSongsWithCache();
+    _initCatalog();
     _fetchMensagem();
     _loadFavorites();
     AccessLog.registrarAcesso();
   }
+
+  Future<void> _initCatalog() async {
+    setState(() => _future = null);
+    try {
+      await CatalogRepository.instance.init();
+      if (!mounted) return;
+      setState(() {
+        _future = Future.value(CatalogRepository.instance.songs);
+        if (CatalogRepository.instance.version == null ||
+            CatalogRepository.instance.version == 0) {
+          _backendMessage =
+              'Catálogo local/asset. Supabase indisponível ou sem atualização.';
+        } else {
+          _backendMessage = null;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _future = Future.error(e);
+        _backendMessage = 'Não foi possível carregar o catálogo: $e';
+      });
+    }
+  }
+
+  void _applySearch(String value) {
+    setState(() {
+      _future = Future.value(CatalogRepository.instance.search(value));
+    });
+  }
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 200), () {
+      _applySearch(value.trim());
+    });
+  }
+
+
 
   Future<void> _loadFavorites() async {
     final favs = await FavoritesStore.load();
@@ -52,6 +93,7 @@ class _HomePageState extends State<HomePage> {
 
     setState(() => _favorites = favs);
   }
+
 
   Future<void> _toggleFavorite(int numero) async {
     await FavoritesStore.toggle(numero);
@@ -67,44 +109,6 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const FavoritesPage()));
-  }
-
-  Future<void> _loadSongsWithCache() async {
-    final cached = await SongCache.load();
-
-    if (!mounted) return;
-
-    setState(() {
-      if (cached != null && cached.isNotEmpty) {
-        _future = Future.value(cached);
-      } else {
-        _future = _fetchSongs('');
-      }
-    });
-
-    try {
-      final fresh = await _fetchSongs('');
-
-      if (!mounted) return;
-
-      await SongCache.save(fresh);
-
-      if (_searchController.text.trim().isEmpty) {
-        setState(() {
-          _future = Future.value(fresh);
-        });
-      }
-    } catch (_) {}
-  }
-
-  @override
-  void dispose() {
-    _mensagemAutoplay?.cancel();
-    _mensagemPageController?.dispose();
-    _debounce?.cancel();
-    _searchController.dispose();
-
-    super.dispose();
   }
 
   Future<void> _fetchMensagem() async {
@@ -166,7 +170,6 @@ class _HomePageState extends State<HomePage> {
 
   void _showMensagemDetalhe(MensagemModel mensagem) {
     final scheme = Theme.of(context).colorScheme;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: scheme.surface,
@@ -198,8 +201,8 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Mensagem do Admin',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
@@ -217,16 +220,8 @@ class _HomePageState extends State<HomePage> {
                 '${mensagem.criadaEm.hour.toString().padLeft(2, '0')}:'
                 '${mensagem.criadaEm.minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Fechar'),
-                ),
+                      color: scheme.onSurface.withValues(alpha: 0.6),
+                    ),
               ),
             ],
           ),
@@ -235,82 +230,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      setState(() {
-        _future = _fetchSongs(value.trim());
-      });
-    });
-  }
-
-  String _normalize(String input) {
-    const withAccents = 'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
-
-    const withoutAccents = 'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
-
-    final buffer = StringBuffer();
-
-    for (final rune in input.split('')) {
-      final idx = withAccents.indexOf(rune);
-
-      buffer.write(idx >= 0 ? withoutAccents[idx] : rune);
-    }
-
-    return buffer.toString().toLowerCase();
-  }
-
-  Future<List<SongModel>> _fetchSongs(String query) async {
-    final client = SupabaseClientFactory.instance;
-
-    const fields = 'numero, cantor, musica, trecho, letra_completa';
-
-    const pageSize = 1000;
-
-    var from = 0;
-
-    final all = <SongModel>[];
-
-    while (true) {
-      final to = from + pageSize - 1;
-
-      final response = await client
-          .from('songs')
-          .select(fields)
-          .order('numero', ascending: true)
-          .range(from, to);
-
-      final list = (response as List?) ?? const [];
-
-      if (list.isEmpty) break;
-
-      all.addAll(list.map((e) => SongModel.fromMap(e as Map<String, dynamic>)));
-
-      if (list.length < pageSize) break;
-
-      from += pageSize;
-    }
-
-    final normalizedQuery = _normalize(query).trim();
-
-    if (normalizedQuery.isEmpty) {
-      return all;
-    }
-
-    return all.where((song) {
-      return _normalize(song.cantor).contains(normalizedQuery) ||
-          _normalize(song.musica).contains(normalizedQuery) ||
-          song.numero.toString().contains(normalizedQuery);
-    }).toList();
-  }
 
   Future<void> _reload() async {
-    setState(() {
-      _future = null;
-    });
-
-    await _loadSongsWithCache();
+    await _initCatalog();
     await _fetchMensagem();
   }
 
@@ -500,6 +422,44 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 _buildMensagemCarousel(),
               ],
+              if (_backendMessage != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.orange.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.cloud_off, color: Colors.orange, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _backendMessage!,
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Tentar novamente',
+                        icon: const Icon(
+                          Icons.refresh,
+                          color: Colors.orange,
+                          size: 20,
+                        ),
+                        onPressed: _reload,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Expanded(
                 child: FutureBuilder<List<SongModel>>(
@@ -518,12 +478,29 @@ class _HomePageState extends State<HomePage> {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
-                          child: Text(
-                            'Erro ao carregar músicas.\n'
-                            'Verifique a conexão com o Supabase e as '
-                            'permissões (RLS).\n\n'
-                            '${snapshot.error}',
-                            textAlign: TextAlign.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.cloud_off,
+                                size: 48,
+                                color: Colors.orange,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Erro ao carregar músicas.\n'
+                                'Verifique a conexão com o Supabase e as '
+                                'permissões (RLS).\n\n'
+                                '${snapshot.error}',
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: _reload,
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Tentar novamente'),
+                              ),
+                            ],
                           ),
                         ),
                       );

@@ -1,0 +1,41 @@
+# DIAGNÓSTICO - Supabase não retorna a lista de músicas (HTTP 402)
+
+## Causa raiz
+O app chama o Supabase (projeto `xbwipfywaksdcxwevfei`) e recebe
+HTTP 402 "Service Restriction". Isso NÃO é erro de código, RLS ou chave:
+é uma restrição aplicada pelo Supabase (Fair Use Policy) porque o projeto
+excedeu uma cota de uso (ex.: egress, tamanho do banco, etc.) ou há
+pagamento em atraso.
+
+Comprovação (testado fora do app):
+  GET https://xbwipfywaksdcxwevfei.supabase.co/rest/v1/songs?select=numero&limit=1
+  apikey: sb_publishable_y1g9psBCmto_AzcT4n04Ng_dJEDue9C
+  -> HTTP 402 (corpo vazio)
+
+Referência: https://supabase.com/docs/guides/troubleshooting/http-status-codes
+(402 = "service restriction", códigos exceeded_* ou overdue_payment).
+
+## O que foi feito no código
+- lib/pages/home_page.dart: quando o fetch falha, o app agora detecta o 402,
+  exibe um banner laranja explicando a restrição e oferece "Tentar novamente".
+- A tela de erro do FutureBuilder ganhou botão "Tentar novamente".
+- Se houver cache local (shared_preferences), ele continua sendo exibido.
+
+## Como resolver (ação necessária no Supabase)
+1. Acesse o Dashboard do Supabase -> projeto xbwipfywaksdcxwevfei.
+2. Vá em Settings -> Usage/Billing (ou Logs) e veja qual cota foi excedida
+   (exceeded_egress_quota, exceeded_db_size_quota, overdue_payment, ...).
+3. Remova a restrição: faça upgrade do plano ou aguarde/reset da cota.
+   Enquanto restrito, os dados continuam acessíveis pelo Dashboard.
+4. Após normalizar, toque "Tentar novamente" no app (ou reinicie).
+
+## Alternativa: migrar para outro projeto Supabase
+Se preferir não esperar, crie um novo projeto Supabase, rode os scripts
+SQL (admin_setup.sql, estatisticas_setup.sql) e atualize as credenciais em
+lib/core/supabase_client.dart (url + anonKey/publishableKey).
+Depois exporte os dados da tabela `songs` do projeto antigo (via Dashboard
+ou pg_dump) e importe no novo.
+
+## Verificação
+- flutter analyze -> No issues found!
+- flutter test -> All tests passed!
