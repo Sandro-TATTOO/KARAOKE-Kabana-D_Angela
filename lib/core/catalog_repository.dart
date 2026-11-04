@@ -54,16 +54,20 @@ class CatalogRepository {
       }
     }
 
-    try {
-      final remote = await fetchRemoteVersion();
-      if (remote != null && (version == null || remote > (version ?? 0))) {
-        final fresh = await fetchAllFromSupabase();
-        if (fresh.isNotEmpty) {
-          await saveLocal(fresh, version: remote, updatedAt: DateTime.now());
+    // Only check remote if we have local data (asset or Hive)
+    // This avoids HTTP 402 when Supabase quota is exhausted
+    if (_songs.isNotEmpty) {
+      try {
+        final remote = await fetchRemoteVersion();
+        if (remote != null && (version == null || remote > (version ?? 0))) {
+          final fresh = await fetchAllFromSupabase();
+          if (fresh.isNotEmpty) {
+            await saveLocal(fresh, version: remote, updatedAt: DateTime.now());
+          }
         }
+      } catch (e) {
+        debugPrint('CatalogRepository: Supabase indisponivel: $e');
       }
-    } catch (e) {
-      debugPrint('CatalogRepository: Supabase indisponivel: $e');
     }
   }
 

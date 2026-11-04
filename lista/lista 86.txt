@@ -1,0 +1,1136 @@
+                          lista 86
+
+
+[86001]
+Arquivo=Almir Guineto
+Musica=Conselho
+inicio=
+[86002]
+Arquivo= 1 Kilo 
+Musica= Deixe me ir
+inicio=
+[86003]
+Arquivo=Dilsinho
+Musica=12 HORAS
+inicio=
+[86004]
+Arquivo=- Junior Vianna -
+Musica=Agora Ficou Bom 
+inicio=
+[86005]
+Arquivo=Alceu valença
+Musica= Cavalo de pau
+inicio=
+[86006]
+Arquivo=Alcione 
+Musica=Nem Morta 
+inicio=
+[86007]
+Arquivo=Gabriela Rocha
+Musica=Aleluia 
+inicio=
+[86008]
+Arquivo=Aline Barros 
+Musica=Soube Que me Amava
+inicio=
+[86009]
+Arquivo=Priscila Senna, Zé Vaqueiro
+Musica=Alvejante
+inicio=
+[86010]
+Arquivo=
+Musica=Os Barões da Pisadinha, Fernando e Sorocaba
+inicio=Amor da Despedida
+[86011]
+Arquivo=Felipe Araújo
+Musica=AMOR DA SUA CAMA
+inicio=
+[86012]
+Arquivo=Hungria
+Musica=Amor e Fé
+inicio=
+[86013]
+Arquivo=ANA VILELA E LUAN SANTANA
+Musica=TREM BALA
+inicio=
+[86014]
+Arquivo=Kleber Lucas
+Musica=Aos pés da Cruz 
+inicio=
+[86015]
+Arquivo=Aretuza Lovi feat. Pabllo Vittar e Glória Groove
+Musica=Joga Bunda
+inicio=
+[86016]
+Arquivo=Arriba Saia 
+Musica=Maria Gasolina
+inicio=
+[86017]
+Arquivo= PÉRICLES
+Musica=ATÉ QUE DUROU 
+inicio=
+[86018]
+Arquivo=Felipe Araújo Part.  Ferrugem
+Musica=ATRASADINHA 
+inicio=
+[86019]
+Arquivo=Enrique Iglesias - Gente de Zona
+Musica=Bailando
+inicio=
+[86020]
+Arquivo=Base de funk  VOLT MIX
+Musica=1808 voltagem
+inicio=
+[86021]
+Arquivo= Israel & Rodolffo
+Musica=BATOM DE CEREJA
+inicio=
+[86022]
+Arquivo=Bebeto 
+Musica= Minha Preta
+inicio=
+[86023]
+Arquivo= Ludmilla
+Musica=Bom
+inicio=
+[86024]
+Arquivo=Bonde do forro
+Musica= Cada volta e um recomeço
+inicio=
+[86025]
+Arquivo=BONDE DO FORRÓ
+Musica=TO FAZENDO FALTA
+inicio=
+[86026]
+Arquivo=BONDE SERTANEJO
+Musica=EU JURO
+inicio=
+[86027]
+Arquivo=Nadson, Ferinha 
+Musica=Cadê Seu Namorado Moça
+inicio=
+[86028]
+Arquivo=Caetano Veloso
+Musica= luz do sol
+inicio=
+[86029]
+Arquivo=Calvin Harris & The Weeknd
+Musica= Over Now 
+inicio=
+[86030]
+Arquivo=Carlos Alberto
+Musica= Aquece me essa noite
+inicio=
+[86031]
+Arquivo=Carlos Alberto 
+Musica=Sabe Deus
+inicio=
+[86032]
+Arquivo=Cauby Peixoto
+Musica=Bastidores
+inicio=
+[86033]
+Arquivo=Chefin ft. Oruam 
+Musica= Do Seu Lado
+inicio=
+[86034]
+Arquivo=Cintura de mola
+Musica= Samara
+inicio=
+[86035]
+Arquivo=Zé Vaqueiro
+Musica=Coladin, Minha Deusa
+inicio=
+[86036]
+Arquivo=Calcinha Preta 
+Musica=Como vou deixar você 
+inicio=
+[86037]
+Arquivo=DALTO 
+Musica=PESSOA 
+inicio=
+[86038]
+Arquivo= João Gomes
+Musica=Dengo
+inicio=
+[86039]
+Arquivo= Kleber Lucas 
+Musica=Deus Cuida de Mim
+inicio=
+[86040]
+Arquivo=Kleber Lucas
+Musica=Deus forte
+inicio=
+[86041]
+Arquivo=Dhema
+Musica=Minha princesa
+inicio=
+[86042]
+Arquivo= Rihanna 
+Musica=Diamonds 
+inicio=
+[86043]
+Arquivo=Dilsinho . Ferrugem, Mumuzinho 
+Musica=Futuro e Presente
+inicio=
+[86044]
+Arquivo=Dilsinho 
+Musica= Péssimo Negócio 
+inicio=
+[86045]
+Arquivo=Dilsinho  & Ivete Sangalo 
+Musica= Iôiô 
+inicio=
+[86046]
+Arquivo=Gigliola Cinquetti 
+Musica=Dio Come Ti Amo 
+inicio=
+[86047]
+Arquivo=DIOGO NOGUEIRA 
+Musica=PÉ NA AREIA 
+inicio=
+[86048]
+Arquivo=
+Musica=DONT WORRY BE HAPPY 
+inicio=Bobby McFerrin  (Acoustic Karaoke)
+[86049]
+Arquivo=DOUGLAS E VINICIUS E MC BRUNINHO 
+Musica= FIGURINHA 
+inicio=Sorriso Resplandecente
+[86050]
+Arquivo=Dragon Ball GT
+Musica=
+inicio=
+[86051]
+Arquivo=Dragon Ball Z 
+Musica=Chala Head Chala
+inicio=
+[86052]
+Arquivo=Nadson, Ferinha
+Musica=Duas 
+inicio=
+[86053]
+Arquivo=Ed Sheeran
+Musica= How Would You Feel 
+inicio=
+[86054]
+Arquivo=EDUARDO COSTA 
+Musica=OLHA ELA AI 
+inicio=
+[86055]
+Arquivo=ELSON
+Musica= JEITO ATREVIDO
+inicio=
+[86056]
+Arquivo=ELVIS PRESLEY
+Musica=SYLVIA 
+inicio=
+[86057]
+Arquivo=EMILIO SANTIAGO
+Musica=A SAUDADE MATA A GENTE
+inicio=
+[86058]
+Arquivo=Emilio Santiago 
+Musica= Dilema
+inicio=
+[86059]
+Arquivo=CLÁUDIO ZOLLI - CARLOS DAFÉ 
+Musica=VENHA MATAR A SAUDADE
+inicio=
+[86060]
+Arquivo= Kell Smith 
+Musica=Era Uma Vez
+inicio=
+[86061]
+Arquivo=Erminio Sinni
+Musica= L'amore vero (Lyrics)
+inicio=
+[86062]
+Arquivo=Erminio Sinni 
+Musica=L-amore vero
+inicio=
+[86063]
+Arquivo=Felipe Araújo
+Musica=ESPAÇOSA DEMAIS 
+inicio=
+[86064]
+Arquivo=João Gomes 
+Musica=Eu Tenho a Senha
+inicio=
+[86065]
+Arquivo=Zé Vaqueiro 
+Musica=Eu Tenho Medo
+inicio=
+[86066]
+Arquivo=Alexandre pires e Mumuzinho
+Musica=Doida pirada
+inicio=
+[86067]
+Arquivo=Diego & Victor Hugo, Bruno & Marrone 
+Musica=Facas
+inicio=
+[86068]
+Arquivo=FAFA DE BELEM
+Musica=MEU DILEMA
+inicio=
+[86069]
+Arquivo=Fagner 
+Musica= Dezembros 
+inicio=
+[86070]
+Arquivo= LUDMILLA, Mari Fernandez
+Musica=Falta de Mim
+inicio=
+[86071]
+Arquivo=Fernando Mendes
+Musica=Eu queria dizer que te amo Numa canção 
+inicio=
+[86072]
+Arquivo=FERNANDO MENDES 
+Musica= SORTE TEM QUEM ACREDITA NELA
+inicio=
+[86073]
+Arquivo=FERRUGEM
+Musica=SINTO SUA FALTA
+inicio=
+[86074]
+Arquivo=Ferrugem
+Musica= Me bloqueia
+inicio=
+[86075]
+Arquivo=Gaab
+Musica=Cuidado
+inicio=
+[86076]
+Arquivo=GAAB e MC HARIEL
+Musica= TEM CAFÉ
+inicio=
+[86077]
+Arquivo=Leonardo Gonçalves
+Musica=Getsêmani 
+inicio=
+[86078]
+Arquivo=Gilliard
+Musica=Não diga nada
+inicio=
+[86079]
+Arquivo=Gladys Knight & The Pips
+Musica= Neither One Of Us 
+inicio=
+[86080]
+Arquivo=Gladys Knight 
+Musica= 4 Once in My Life
+inicio=
+[86081]
+Arquivo=GRANDE ENCONTRO FORRO
+Musica=Disparada
+inicio=
+[86082]
+Arquivo=Harry Styles
+Musica= Sign Of The Times
+inicio=
+[86083]
+Arquivo=Herois da Resitência 
+Musica= Double De Corpo 
+inicio=
+[86084]
+Arquivo=Hojerizah 
+Musica=Pros Que Estão Em Casa 
+inicio=
+[86085]
+Arquivo=Hungria Hip Hop
+Musica= Um Pedido 
+inicio=
+[86086]
+Arquivo= Billy Preston 
+Musica=I'm Never Gonna Say Goodbye
+inicio=
+[86087]
+Arquivo=Jose Augusto
+Musica=Fui eu
+inicio=
+[86088]
+Arquivo=Hungria e Tribo da Periferia 
+Musica=Insônia
+inicio=
+[86089]
+Arquivo= Ja Rule feat Ashant
+Musica=Always on Time
+inicio=
+[86090]
+Arquivo= Ferrugem
+Musica=Interessante
+inicio=
+[86091]
+Arquivo=Israel & Rodolffo
+Musica=Chegou um Áudio 
+inicio=
+[86092]
+Arquivo=JERRY ADRIANI 
+Musica=INDIFERENÇA
+inicio=
+[86093]
+Arquivo=Os Barões da Pisadinha
+Musica=JÁ QUE ME ENSINOU A BEBER
+inicio=
+[86094]
+Arquivo=Joao Bosco 
+Musica= Desenho de giz
+inicio=
+[86095]
+Arquivo= Andréia Fontes
+Musica=João viu
+inicio=
+[86096]
+Arquivo= Xand Avião
+Musica=INQUILINA
+inicio=
+[86097]
+Arquivo=Jose Augusto
+Musica=Fui eu
+inicio=
+[86098]
+Arquivo=Jose Feliciano
+Musica= Concavo Y Convexo
+inicio=
+[86099]
+Arquivo= Gal Costa E Zeca Balero 
+Musica= Vapor Barato E Flor Da Pele
+inicio=
+[86100]
+Arquivo=NADSON O FERINHA
+Musica= A CULPA É NOSSA 
+inicio=
+[86101]
+Arquivo=Felipe Araújo
+Musica=A Mala é Falsa
+inicio=
+[86102]
+Arquivo= JÕAO GOMES - PISEIRO
+Musica=A NOITE 
+inicio=
+[86103]
+Arquivo=JOÃO GOMES - PISEIRO 
+Musica= AQUELAS COISAS -
+inicio=
+[86104]
+Arquivo=Hungria Hip Hop
+Musica=Coração de Aço 
+inicio=
+[86105]
+Arquivo= NADSON O FERINHA
+Musica=ERRO GOSTOSO 
+inicio=
+[86106]
+Arquivo= Ferrugem 
+Musica=Eu juro
+inicio=
+[86107]
+Arquivo= Ferrugem
+Musica=Eu Não Sou De Me Entregar
+inicio=
+[86108]
+Arquivo= Ferrugem 
+Musica=Minha namorada
+inicio=
+[86109]
+Arquivo= Ferrugem 
+Musica=Só de olhar
+inicio=
+[86110]
+Arquivo= Ferrugem 
+Musica= Tentei ser incrível
+inicio=
+[86111]
+Arquivo= Ferrugem 
+Musica= IZA - Me Perdoa
+inicio=
+[86112]
+Arquivo= Ferrugem , Sorriso Maroro
+Musica=Apaguei Pra Todos
+inicio=
+[86113]
+Arquivo=ImaginaSamba
+Musica= Ainda é Cedo Pra Dizer Bye, Bye
+inicio=
+[86114]
+Arquivo=ImaginaSamba
+Musica= Com você tô completo
+inicio=
+[86115]
+Arquivo=Imaginasamba
+Musica=Me Assume Ou Me Esquece
+inicio=
+[86116]
+Arquivo=Imaginasamba
+Musica=Não fui homem pra te merecer
+inicio=
+[86117]
+Arquivo=Imaginasamba
+Musica= Retrô
+inicio=
+[86118]
+Arquivo=Imaginasamba
+Musica= Vá com Deus
+inicio=
+[86119]
+Arquivo= Intimistas 
+Musica=Deixa Alagar
+inicio=
+[86120]
+Arquivo=Intimistas
+Musica=Quem Vive de Amor Não Morre
+inicio=
+[86121]
+Arquivo=Intimistas
+Musica=Revirando os Fatos
+inicio=
+[86122]
+Arquivo=ÁVINE E MATHEUS FERNANDES
+Musica=LATE CORAÇÃO - CORAÇÃO CACHORRO
+inicio=
+[86123]
+Arquivo=Ludmilla  (Part. Thiaguinho)
+Musica=Amor Difícil
+inicio=
+[86124]
+Arquivo=Ludmilla 
+Musica= Meu desapego
+inicio=
+[86125]
+Arquivo=Ludmilla 
+Musica= Por causa de você _ Baby _ 1 minuto
+inicio=
+[86126]
+Arquivo=Ludmilla , Tá Na Mente
+Musica= Dorme com Deus _ Fica
+inicio=
+[86127]
+Arquivo=NADSON O FERINHA
+Musica=MANDE UM SINAL
+inicio=
+[86128]
+Arquivo= NADSON O FERINHA
+Musica=NÃO DIGITA
+inicio=
+[86129]
+Arquivo= NADSON O FERINHA
+Musica=Posta Ai 
+inicio=
+[86130]
+Arquivo= NADSON O FERINHA
+Musica= QUANDO TEM SENTIMENTO
+inicio=
+[86131]
+Arquivo=JOÃO GOMES FEAT VITOR FERNANDES 
+Musica=SE FOR AMOR
+inicio=
+[86132]
+Arquivo=Nadson O Ferinha
+Musica= Sete Bilhões
+inicio=
+[86133]
+Arquivo=Lexa 
+Musica=Posso Ser
+inicio=
+[86134]
+Arquivo=Barões da Pisadinha Part. Xand Avião
+Musica=Basta Você Me Ligar 
+inicio=
+[86135]
+Arquivo=BokaLoka
+Musica=Não Pedi Pra Me Apaixonar 
+inicio=
+[86136]
+Arquivo=Calcinha Preta
+Musica= Faço Chover
+inicio=
+[86137]
+Arquivo=ZÉ VAQUEIRO 
+Musica=CANGOTE
+inicio=
+[86138]
+Arquivo=Carlos Alberto 
+Musica=Louco fui eu
+inicio=
+[86139]
+Arquivo=IMAGINA SAMBA
+Musica= PRETEXTO
+inicio=
+[86140]
+Arquivo=Jeito Moleque 
+Musica=Eu Nunca Amei Assim  Sobrenatural
+inicio=
+[86141]
+Arquivo=Barões da Pisadinha
+Musica= Esquema Preferido
+inicio=
+[86142]
+Arquivo= Marilía Mendonça, Henrique e Juliano
+Musica=Flor e o Beija-Flor
+inicio=
+[86143]
+Arquivo= Jonas Esticado
+Musica=Investe em Mim 
+inicio=
+[86144]
+Arquivo=Gabriel Diniz
+Musica=Jenifer
+inicio=
+[86145]
+Arquivo=Zé Vaqueiro
+Musica=Meu Mel -
+inicio=
+[86146]
+Arquivo= Bonde Do Forró
+Musica=O Que Será
+inicio=
+[86147]
+Arquivo=Ferrugem
+Musica=Pirata e Tesouro
+inicio=
+[86148]
+Arquivo=Arriba Saia PoutPourri
+Musica=Xote) Maria Gasolina, Mocinhas da Cidade e Libera o toim
+inicio=
+[86149]
+Arquivo=Mc Marcinho
+Musica=Rap Do solitário
+inicio=
+[86150]
+Arquivo= Barões da Pisadinha
+Musica=Recairei 
+inicio=
+[86151]
+Arquivo=Dragon ball Z
+Musica=Temos a forca
+inicio=
+[86152]
+Arquivo=Luan Santana Part.MC Kekel
+Musica=Vingança
+inicio=
+[86153]
+Arquivo=Zé Vaqueiro
+Musica=Volta Comigo BB
+inicio=
+[86154]
+Arquivo=Keith Sweat 
+Musica=Make It Last Forever 
+inicio=
+[86155]
+Arquivo=Carlos Alberto
+Musica=Lado A Lado
+inicio=
+[86156]
+Arquivo=Hungria HipHop
+Musica=Lembranças 
+inicio=
+[86157]
+Arquivo=Leo Jaime
+Musica=Charme do mundo
+inicio=
+[86158]
+Arquivo=Al Jarreau
+Musica=Your Song
+inicio=
+[86159]
+Arquivo=LÉO MAGALHÃES
+Musica=CDS E LIVROS
+inicio=
+[86160]
+Arquivo=Henrique e Juliano
+Musica=Liberdade Provisória 
+inicio=
+[86161]
+Arquivo=Akon
+Musica=Lonely by
+inicio=
+[86162]
+Arquivo=Ludmilla 
+Musica=Se Não Chorar Com Pagode
+inicio=
+[86163]
+Arquivo=Ludmilla Feat. Caio Luccas
+Musica=Saudade da Gente
+inicio=
+[86164]
+Arquivo=Ludmilla
+Musica=Maldivas
+inicio=
+[86165]
+Arquivo=Ludmilla
+Musica=Maliciosa 
+inicio=
+[86166]
+Arquivo=Ja Rule ft Ashanti
+Musica=Mesmerize
+inicio=
+[86167]
+Arquivo=João Gomes
+Musica=Meu Pedaço de Pecado
+inicio=
+[86168]
+Arquivo=JUNIOR VIANNA 
+Musica=MUNDO DOENTE
+inicio=
+[86169]
+Arquivo= Bruna Karla
+Musica=Pai Eu Confiarei
+inicio=
+[86170]
+Arquivo= Anitta 
+Musica=Não Perco Meu Tempo
+inicio=
+[86171]
+Arquivo=Nadson O Ferinha, Léo Santana
+Musica=Não Vou Falar Nada
+inicio=
+[86172]
+Arquivo=Nelly feat. Kelly Rowland
+Musica=Dilemma 
+inicio=
+[86173]
+Arquivo= Julio Iglesias
+Musica=O Melhor de Tua Vida
+inicio=
+[86174]
+Arquivo=Nadson o Ferinha 
+Musica=Oi Balde
+inicio=
+[86175]
+Arquivo=Oruam ft. Chris MC, WIU
+Musica=Para de Mentir
+inicio=
+[86176]
+Arquivo=Oruam ft. Ryan SP 
+Musica= Essa daqui vira trend -
+inicio=
+[86177]
+Arquivo=Os Barões Da Pisadinha
+Musica=Tá Rocheda 
+inicio=
+[86178]
+Arquivo= ALCIONE 
+Musica=OU ELA OU EU
+inicio=
+[86179]
+Arquivo=Ferrugem, Ludmilla
+Musica=Paciência
+inicio=
+[86180]
+Arquivo=FAFÁ DE BELÉM 
+Musica= AMOR CIGANO
+inicio=
+[86181]
+Arquivo=Alicia Keys 
+Musica=Empire State Of Mind Part 2
+inicio=
+[86182]
+Arquivo=Ed Sheeran
+Musica=Photograph 
+inicio=
+[86183]
+Arquivo=MC Ryan SP, MC Kako Oruam, MC Joãozinho Vt
+Musica=Pior Versão
+inicio=
+[86184]
+Arquivo=JUNIOR VIANNA
+Musica=AMIGO TURCO 
+inicio=
+[86185]
+Arquivo=Ferrugem 
+Musica=PRA VOCÊ ACREDITAR 
+inicio=
+[86156]
+Arquivo=Hungria Hip Hop, João Carlos Martins 
+Musica=Preta
+inicio=
+[86187]
+Arquivo=Anavitória, Vitor Kley 
+Musica=Pupila
+inicio=
+[86188]
+Arquivo= Nadson, o Ferinha
+Musica=Quem é o Louco Entre Nós
+inicio=
+[86189]
+Arquivo=ROBERTO CARLOS
+Musica=ÀS VEZES PENSO 
+inicio=
+[86190]
+Arquivo=Conde do Forró
+Musica=Romance Desapegado 
+inicio=
+[86191]
+Arquivo=Alcione 
+Musica=Queda de Braço 
+inicio=
+[86192]
+Arquivo= Emílio Santiago
+Musica=Coisas da Paixão
+inicio=
+[86193]
+Arquivo= João Nogueira 
+Musica=Espelho
+inicio=
+[86194]
+Arquivo=Brisa Star, Thiago Jhonathan
+Musica=Se Joga no Passinho
+inicio=
+[86195]
+Arquivo= Zé Felipe, Barões da Pisadinha
+Musica=Senta Danada
+inicio=
+[86196]
+Arquivo=Simone
+Musica=Jura Secreta
+inicio=
+[86197]
+Arquivo=Heróis da Resistência
+Musica=SO PRO MEU PRAZER
+inicio=
+[86198]
+Arquivo= Lionel Richie
+Musica=Still 
+inicio=
+[86199]
+Arquivo=Israel e Rodolffo 
+Musica=Também Sei Fazer Falta
+inicio=
+[86200]
+Arquivo=Keith Sweat
+Musica=Twisted 
+inicio=
+[86201]
+Arquivo=Nelly, R. Kelly & Ashanti
+Musica=Wonderful
+inicio=
+[86202]
+Arquivo= ARMANDO FILHO 
+Musica=VOCÊ TEM VALOR
+inicio=
+[86203]
+Arquivo= DJ Guuga e DJ Ivis 
+Musica=VOLTA BEBÊ, VOLTA NENÉM
+inicio=
+[86204]
+Arquivo=BANDA DJAVU
+Musica= ME LIBERA
+inicio=
+[86205]
+Arquivo=Di Paullo & Paulino _ Marília Mendonça 
+Musica=ESTRELINHA
+inicio=
+[86206]
+Arquivo=Gabriela Rocha
+Musica=Eu navegarei
+inicio=
+[86207]
+Arquivo=Gabriela Rocha, Ludmila Ferber
+Musica=Os Sonhos de Deus
+inicio=
+[86208]
+Arquivo=Marília Mendonça
+Musica=Graveto
+inicio=
+[86209]
+Arquivo=Grupo Revelação
+Musica= Trilha do Amor
+inicio=
+[86210]
+Arquivo=Jessé Aguiar
+Musica=Eu Não Desisto 
+inicio=
+[86211]
+Arquivo= Raça Negra
+Musica= Transplante
+inicio=
+[86212]
+Arquivo=Romeu Part. Taty Pink
+Musica=Antes de Ir
+inicio=
+[86213]
+Arquivo=Banda Djavu
+Musica= O que Pensa que eu Sou
+inicio=
+[86214]
+Arquivo=Simone e Simaria
+Musica=Foi Pá Pum 
+inicio=
+[86215]
+Arquivo=Raça negra
+Musica=Ela
+inicio=
+[86216]
+Arquivo= Menos é Mais, Matheus Fernandes 
+Musica=Lapada Dela
+inicio=
+[86217]
+Arquivo= Marília Mendonça
+Musica=Leão
+inicio=
+[86218]
+Arquivo=Nattan, Felipe Amorim
+Musica=Love Gostosinho
+inicio=
+[86219]
+Arquivo=LULU SANTOS (pouporry)
+Musica=TODA FORMA DE AMOR+UM CERTO ALGUEM+ÚLTIMO ROMÂNTICO
+inicio=
+[86220]
+Arquivo=Gabriela Rocha
+Musica=Maranata
+inicio=
+[86221]
+Arquivo=Menos é Mais (pouporry)
+Musica=Melhor eu ir=Ligando os Fatos=Sonho de Amor=Deixa eu te querer
+inicio=
+[86222]
+Arquivo= Ministério Zoe 
+Musica= Aquieta Minha Alma
+inicio=
+[86223]
+Arquivo=Roberto Carlos
+Musica= A Primeira Vez 
+inicio=
+[86224]
+Arquivo=Roberto Carlos
+Musica=Música suave
+inicio=
+[86225]
+Arquivo=Felipe Amorim
+Musica=Toca o Trompete
+inicio=
+[86226]
+Arquivo=
+Musica=
+inicio=
+[86227]
+Arquivo=
+Musica=
+inicio=
+[86228]
+Arquivo=
+Musica=
+inicio=
+[86229]
+Arquivo=
+Musica=
+inicio=
+[86230]
+Arquivo=
+Musica=
+inicio=
+[86231]
+Arquivo=
+Musica=
+inicio=
+[86232]
+Arquivo=
+Musica=
+inicio=
+[86233]
+Arquivo=
+Musica=
+inicio=
+[86234]
+Arquivo=
+Musica=
+inicio=
+[86235]
+Arquivo=
+Musica=
+inicio=
+[86236]
+Arquivo=
+Musica=
+inicio=
+[86237]
+Arquivo=
+Musica=
+inicio=
+[86238]
+Arquivo=
+Musica=
+inicio=
+[86239]
+Arquivo=
+Musica=
+inicio=
+[86240]
+Arquivo=
+Musica=
+inicio=
+[86241]
+Arquivo=
+Musica=
+inicio=
+[86242]
+Arquivo=
+Musica=
+inicio=
+[86243]
+Arquivo=
+Musica=
+inicio=
+[86244]
+Arquivo=
+Musica=
+inicio=
+[86245]
+Arquivo=
+Musica=
+inicio=
+[86246]
+Arquivo=
+Musica=
+inicio=
+[86247]
+Arquivo=
+Musica=
+inicio=
+[86248]
+Arquivo=
+Musica=
+inicio=
+[86249]
+Arquivo=
+Musica=
+inicio=
+[86250]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+[86]
+Arquivo=
+Musica=
+inicio=
+
