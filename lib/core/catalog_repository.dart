@@ -75,7 +75,8 @@ class CatalogRepository {
     try {
       final raw = await rootBundle.loadString(assetPath);
       if (raw.trim().isEmpty) return const <SongModel>[];
-      final decoded = jsonDecode(raw) as List<dynamic>;
+      final jsonMap = jsonDecode(raw) as Map<String, dynamic>;
+      final List<dynamic> decoded = jsonMap['musicas'] as List<dynamic>;
       return decoded
           .map((e) => SongModel.fromMap(e as Map<String, dynamic>))
           .toList();
